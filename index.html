@@ -666,6 +666,78 @@
   <script src="js/custom.js"></script>
 
 
+
+
+  
+  <!-- Chatbot Section -->
+<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+  <button id="chatbot-toggle" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 50%; cursor: pointer;">
+    💬
+  </button>
+  <div id="chatbot-box" style="display: none; width: 300px; height: 400px; background-color: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); padding: 10px; overflow-y: auto;">
+    <div id="chatbot-messages" style="height: 300px; overflow-y: auto; margin-bottom: 10px;"></div>
+    <input id="chatbot-input" type="text" placeholder="Type your message..." style="width: calc(100% - 20px); padding: 5px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px;">
+    <button id="chatbot-send" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Send</button>
+  </div>
+</div>
+
+<script>
+  const chatbotToggle = document.getElementById('chatbot-toggle');
+  const chatbotBox = document.getElementById('chatbot-box');
+  const chatbotMessages = document.getElementById('chatbot-messages');
+  const chatbotInput = document.getElementById('chatbot-input');
+  const chatbotSend = document.getElementById('chatbot-send');
+
+  const responses = {
+    "1": "You selected Employee Details. Please provide the employee ID.",
+    "2": "You selected Add Employee. Please provide the employee details.",
+    "3": "You selected Update Employee. Please provide the employee ID and updated information.",
+    "4": "You selected Remove Employee. Please provide the employee ID.",
+    "default": "Invalid option. Please type a number (1-4):\n1. View Employee Details\n2. Add Employee\n3. Update Employee\n4. Remove Employee"
+  };
+
+  const handleUserMessage = (message) => {
+    const lowerCaseMessage = message.toLowerCase();
+    const output =
+      responses[lowerCaseMessage] || responses["default"];
+    return output;
+  };
+
+  chatbotToggle.addEventListener('click', () => {
+    chatbotBox.style.display = chatbotBox.style.display === 'none' ? 'block' : 'none';
+  });
+
+  chatbotSend.addEventListener('click', () => {
+    const userMessage = chatbotInput.value.trim();
+    if (!userMessage) return;
+
+    const userMessageElement = document.createElement('div');
+    userMessageElement.textContent = `You: ${userMessage}`;
+    userMessageElement.style.marginBottom = '5px';
+    chatbotMessages.appendChild(userMessageElement);
+
+    const botResponse = handleUserMessage(userMessage);
+
+    const botMessageElement = document.createElement('div');
+    botMessageElement.textContent = `Bot: ${botResponse}`;
+    botMessageElement.style.marginBottom = '10px';
+    botMessageElement.style.color = 'blue';
+    chatbotMessages.appendChild(botMessageElement);
+
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+    chatbotInput.value = '';
+  });
+
+  chatbotInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      chatbotSend.click();
+    }
+  });
+</script>
+
+
+
 </body>
 </body>
 
