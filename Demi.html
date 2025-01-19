@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Page with Sections</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+        .navbar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .navbar ul li {
+            margin: 0 15px;
+        }
+        .navbar ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 16px;
+            transition: background-color 0.3s;
+        }
+        .navbar ul li a:hover {
+            background-color: #575757;
+            border-radius: 4px;
+        }
+        section {
+            padding: 20px;
+            height: calc(100vh - 60px); /* Adjust height to account for navbar */
+            box-sizing: border-box;
+            margin-top: 60px; /* Prevent content from overlapping with navbar */
+        }
+        .management {
+            background-color: #f4f4f4;
+        }
+        .computer-science {
+            background-color: #e8f8f5;
+        }
+        .law {
+            background-color: #f9ebea;
+        }
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <ul>
+        <li><a href="#management">Management</a></li>
+        <li><a href="#computer-science">Computer Science</a></li>
+        <li><a href="#law">Law</a></li>
+    </ul>
+</div>
+
+<section id="management" class="management">
+    <h2>Management</h2>
+    <p>Management is the process of planning, organizing, leading, and controlling resources to achieve specific goals effectively and efficiently. It plays a crucial role in businesses and organizations of all sizes.</p>
+</section>
+
+<section id="computer-science" class="computer-science">
+    <h2>Computer Science</h2>
+    <p>Computer Science is the study of computers and computational systems. It involves understanding algorithms, data structures, software design, and various programming languages to solve complex problems.</p>
+</section>
+
+<section id="law" class="law">
+    <h2>Law</h2>
+    <p>Law is the system of rules created and enforced through social or governmental institutions to regulate behavior. It ensures justice, fairness, and order in society.</p>
+</section>
+
+</body>
+</html>
