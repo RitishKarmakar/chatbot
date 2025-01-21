@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            color: #25d366; /* WhatsApp green */
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        input[type="submit"], button {
+            background-color: #25d366; /* WhatsApp green */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #128c7e;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #25d366; /* WhatsApp green */
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e0f2f1;
+        }
+
+        .actions form {
+            display: inline;
+        }
+
+        .logout-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .logout-link a {
+            color: #25d366;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-link a:hover {
+            color: #128c7e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <h2>Add a New Book</h2>
+        <form method="post" action="/add_book">
+            <label for="title">Title:</label>
+            <input type="text" name="title" required><br>
+            
+            <label for="author">Author:</label>
+            <input type="text" name="author"><br>
+            
+            <label for="publication_year">Publication Year:</label>
+            <input type="number" name="publication_year" required><br>
+            
+            <label for="copies_available">Copies Available:</label>
+            <input type="number" name="copies_available" required><br>
+            
+            <label for="department">Department:</label>
+            <select name="department" required>
+                <option value="management">Management</option>
+                <option value="market">Market</option>
+                <option value="computer_science">Computer Science</option>
+            </select><br>
+            
+            <input type="submit" value="Add Book">
+        </form>
+
+        <h2>Existing Books</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Publication Year</th>
+                    <th>Copies Available</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ book['book_id'] }}</td>
+                    <td>{{ book['title'] }}</td>
+                    <td>{{ book['author'] }}</td>
+                    <td>{{ book['publication_year'] }}</td>
+                    <td>{{ book['copies_available'] }}</td>
+                    <td>{{ book['department'] }}</td>
+                    <td class="actions">
+                        <form method="post" action="/delete_book/{{ book['book_id'] }}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="logout-link">
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
