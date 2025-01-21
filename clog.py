@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session, j
 import mysql.connector  # Using MySQL Connector
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # Secret key for session management
+app.secret_key = ""  # Secret key for session management
 
 # Simulated admin credentials
 ADMIN_USERNAME = "admin"
@@ -11,19 +11,24 @@ ADMIN_PASSWORD = "password"
 # MySQL database connection
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",       
-        user="root",             
-        password="root",  
-        database="book"         
+        host="localhost",
+        user="root",
+        password="root",
+        database="book"
     )
 
 # Public page
 @app.route("/")
 def index():
-    return redirect(url_for("login"))
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM books ORDER BY department")
+    books = cursor.fetchall()
+    conn.close()
+    return render_template("test.html", books=books)
 
 # Admin page (protected)
-@app.route("/2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325", methods=["GET", "POST"])
+@app.route("/admin", methods=["GET", "POST"])
 def admin_page():
     if "admin" in session:
         conn = get_db_connection()
@@ -38,7 +43,7 @@ def admin_page():
 # Add book route
 @app.route("/add_book", methods=["POST"])
 def add_book():
-    if "2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325" in session:
+    if "admin" in session:
         title = request.form["title"]
         author = request.form["author"]
         publication_year = request.form["publication_year"]
@@ -58,19 +63,44 @@ def add_book():
     else:
         return redirect(url_for("login"))
 
-# Delete book route
-@app.route("/delete_book/<int:book_id>", methods=["POST"])
-def delete_book(book_id):
-    if "2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325" in session:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM books WHERE book_id = %s", (book_id,))
-        conn.commit()
-        conn.close()
+# Chatbot route for handling user input
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    message = data.get("message", "").lower()
 
-        return redirect(url_for("admin_page"))
+    # Connect to the database
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Search for matches in the `books` table
+    cursor.execute(
+        "SELECT book_id, title, department FROM books WHERE LOWER(title) LIKE %s OR LOWER(department) LIKE %s",
+        (f"%{message}%", f"%{message}%")
+    )
+    matches = cursor.fetchall()
+    conn.close()
+
+    # If matches are found, return them as options
+    if matches:
+        options = []
+        for match in matches:
+            options.append({
+                "text": f"{match['title']} ({match['department']})",
+                "link": f"#{match['book_id']}"  # Use the book_id as an anchor for scrolling
+            })
+        response = {
+            "responseType": "options",
+            "options": options
+        }
     else:
-        return redirect(url_for("login"))
+        # No matches found
+        response = {
+            "responseType": "text",
+            "response": "Sorry, I couldn't find any matching books or departments."
+        }
+
+    return jsonify(response)
 
 # Login page for admin
 @app.route("/login", methods=["GET", "POST"])
@@ -79,7 +109,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session["2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325"] = True
+            session["admin"] = True
             return redirect(url_for("admin_page"))
         else:
             return redirect(url_for("login"))
@@ -88,7 +118,7 @@ def login():
 # Logout
 @app.route("/logout")
 def logout():
-    session.pop("2063d112e46b326178d70cf7aba81fad42a8bcd8e096d765cb6af02809dde325", None)
+    session.pop("admin", None)
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
