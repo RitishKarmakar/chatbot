@@ -1,8 +1,11 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 import mysql.connector  # Using MySQL Connector
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 app = Flask(__name__)
-app.secret_key = ""  # Secret key for session management
+app.secret_key = "BE@@#$BBLOPP"  # Secret key for session management
 
 # Simulated admin credentials
 ADMIN_USERNAME = "admin"
@@ -69,37 +72,43 @@ def chat():
     data = request.json
     message = data.get("message", "").lower()
 
-    # Connect to the database
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-
-    # Search for matches in the `books` table
-    cursor.execute(
-        "SELECT book_id, title, department FROM books WHERE LOWER(title) LIKE %s OR LOWER(department) LIKE %s",
-        (f"%{message}%", f"%{message}%")
-    )
-    matches = cursor.fetchall()
+    cursor.execute("SELECT book_id, title, department FROM books")
+    books = cursor.fetchall()
     conn.close()
 
-    # If matches are found, return them as options
-    if matches:
-        options = []
-        for match in matches:
-            options.append({
-                "text": f"{match['title']} ({match['department']})",
-                "link": f"#{match['book_id']}"  # Use the book_id as an anchor for scrolling
-            })
-        response = {
-            "responseType": "options",
-            "options": options
-        }
-    else:
-        # No matches found
-        response = {
-            "responseType": "text",
-            "response": "Sorry, I couldn't find any matching books or departments."
-        }
+    corpus = [message] + [book["title"] + " " + book["department"] for book in books]
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
 
+    query_vector = tfidf_matrix[0]
+    doc_vectors = tfidf_matrix[1:]
+    similarities = cosine_similarity(query_vector, doc_vectors).flatten()
+    
+    sorted_books = sorted(zip(books, similarities), key=lambda x: x[1], reverse=True)
+    
+    TP = 1  # Assuming one relevant document is retrieved
+    FP = len(books) - TP
+    FN = 0
+    TN = 0
+    
+    precision = TP / (TP + FP)
+    recall = TP / (TP + FN)
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+    f1_measure = 2 * (precision * recall) / (precision + recall)
+    
+    print("Query Similarity Results:")
+    for book, similarity in sorted_books:
+        print(f"Book ID {book['book_id']}: Similarity = {similarity}")
+    print(f"Precision: {precision}, Recall: {recall}, Accuracy: {accuracy}, F1 Measure: {f1_measure}")
+    
+    if sorted_books and sorted_books[0][1] > 0:
+        options = [{"text": f"{book['title']} ({book['department']})", "link": f"#{book['book_id']}"} for book, _ in sorted_books]
+        response = {"responseType": "options", "options": options}
+    else:
+        response = {"responseType": "text", "response": "Sorry, I couldn't find any matching books or departments."}
+    
     return jsonify(response)
 
 # Login page for admin
@@ -122,4 +131,4 @@ def logout():
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',port='8080')
+    app.run(debug=True)

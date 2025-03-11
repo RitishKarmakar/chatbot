@@ -67,6 +67,7 @@
             bottom: 80px;
             right: 20px;
             width: 380px;
+            z-index: 999999;
             max-height: 500px;
             background: #ffffff;
             border-radius: 15px;
@@ -109,6 +110,7 @@
         .chat-box {
             flex: 1;
             padding: 10px;
+            z-index: 999999;
             overflow-y: auto;
             background: #ece5dd;
             display: flex;
@@ -330,8 +332,9 @@
                 <p><strong>Copies Available:</strong> {{ book.copies_available }}</p>
             </div>
         </div>
-        {% endfor %}
+        {% endfor %}w
     </div>
     {% endfor %}
 </body>
-</html>
+</html>  
+
